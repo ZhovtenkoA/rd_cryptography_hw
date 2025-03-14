@@ -1,0 +1,1 @@
+Дэшифрованный флаг: crypto{robot_dreams}
