@@ -1,0 +1,12 @@
+Открытый ключ подписи Bob (PEM):
+-----BEGIN PUBLIC KEY-----
+MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEzMMF5nA6o0MWb2Nrb/zQlpt0zqPFxdeP
+upKV7GTngysdUhUxJyIMOUv1Wp2tBlUEeSrNXqwCCT/74coVmpGV2w==
+-----END PUBLIC KEY-----
+
+
+Открытый ключ ECDH Bob (hex):
+6d17d47df3c43f6eeda8d3ceb06d844aec5967238a8a0c15fac8f19c5c795a77
+
+Подпись открытого ключа ECDH Bob (hex):
+3044022019a18e2ee3fa6eaf92824d1f723e41a30ab76bbca8f01bd4c19199c3f4987ba1022068d174218db6f26abc2aedf5cd7ac6622a8314e39359639ec297eaea2d409596
