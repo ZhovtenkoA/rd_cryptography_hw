@@ -1,10 +1,10 @@
 [user]
     name = Zhovtenko Oleksii
     email = zhowtenko.oleksiy@gmail.com
-    signingkey = C:\\Users\\Zhowt\\.ssh\\id_ed25519
+    signingkey = C:\\Users\\Zhowt\\.ssh\\git_key
 
 [gpg]
     format = ssh
 
 [gpg "ssh"]
-    allowedSignersFile = D:\\rd_cryptography_hw\\allowed_signers
+    allowedSignersFile = C:\\Users\\Zhowt\\.ssh\\allowed_signers
