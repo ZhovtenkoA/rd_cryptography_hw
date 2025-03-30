@@ -1,10 +1,11 @@
 [user]
     name = Zhovtenko Oleksii
     email = zhowtenko.oleksiy@gmail.com
-    signingkey = C:\\Users\\Zhowt/.ssh/id_dsa
+    signingkey = "C:\\Users\\Zhowt\\.ssh\\git_key"
 
 [gpg]
     format = ssh
 
 [gpg "ssh"]
-    allowedSignersFile = C:\\Users\\Zhowt/.ssh/id_dsa
+    allowedSignersFile = "C:\\Users\\Zhowt\\.ssh\\allowed_signers"
+    program = "C:\\Windows\\System32\\OpenSSH\\ssh-keygen.exe"
