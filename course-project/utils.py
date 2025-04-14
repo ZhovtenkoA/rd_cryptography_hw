@@ -17,7 +17,7 @@ THEIR_PROMPT = "\033[31m" + "\n<<< " + "\033[0m"
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 8888
 
-SESSION_KEY_SALT = b'some fixed salt' # ВИЗНАЧАЄМО ФІКСОВАНИЙ SALT
+SESSION_KEY_SALT = b"some fixed salt"  # ВИЗНАЧАЄМО ФІКСОВАНИЙ SALT
 
 
 def prompt():
@@ -61,8 +61,6 @@ async def bob_client():
     return await asyncio.open_connection(SERVER_HOST, SERVER_PORT)
 
 
-
-
 def generate_key_pair_ecds():
     """Generate a new ECDSA private and public key pair."""
     private_key = ec.generate_private_key(
@@ -80,52 +78,45 @@ def generate_key_pair():
     public_key = private_key.public_key()
     return private_key, public_key
 
+
 def serialize_public_key(public_key):
     """Serialize the public key to bytes."""
     public_bytes = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
     )
     return public_bytes
+
 
 def serialize_private_key(private_key):
     """Serialize the private key to bytes (for storage, handle with care!)."""
     private_bytes = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()  # For simplicity, no password
+        encryption_algorithm=serialization.NoEncryption(),  # For simplicity, no password
     )
     return private_bytes
 
+
 def deserialize_public_key(public_bytes):
     """Deserialize the public key from bytes."""
-    public_key = serialization.load_pem_public_key(
-        public_bytes
-    )
+    public_key = serialization.load_pem_public_key(public_bytes)
     return public_key
-
 
 
 def sign_data(private_key, data):
     """Sign data using the private key."""
-    signature = private_key.sign(
-        data,
-        ec.ECDSA(hashes.SHA256())
-    )
+    signature = private_key.sign(data, ec.ECDSA(hashes.SHA256()))
     return signature
+
 
 def verify_signature(public_key, signature, data):
     """Verify the signature of the data using the public key."""
     try:
-        public_key.verify(
-            signature,
-            data,
-            ec.ECDSA(hashes.SHA256())
-        )
+        public_key.verify(signature, data, ec.ECDSA(hashes.SHA256()))
         return True
     except Exception:
         return False
-    
 
 
 def generate_diffie_hellman_key():
@@ -134,20 +125,26 @@ def generate_diffie_hellman_key():
     public_key = private_key.public_key()
     return private_key, public_key
 
+
 def serialize_dh_public_key(public_key):
     """Serialize the Diffie-Hellman public key to bytes."""
-    public_bytes = public_key.public_bytes(encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw)
+    public_bytes = public_key.public_bytes(
+        encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+    )
     return public_bytes
+
 
 def deserialize_dh_public_key(public_bytes):
     """Deserialize the Diffie-Hellman public key from bytes."""
     public_key = x25519.X25519PublicKey.from_public_bytes(public_bytes)
     return public_key
 
+
 def derive_shared_secret(private_key, public_key):
     """Derive a shared secret using Diffie-Hellman."""
     shared_secret = private_key.exchange(public_key)
     return shared_secret
+
 
 def derive_session_key(shared_secret):
     """Derive a session key from the shared secret using HKDF."""
@@ -155,11 +152,10 @@ def derive_session_key(shared_secret):
         algorithm=hashes.SHA256(),
         length=32,  # 32 bytes for AES-256 key
         salt=SESSION_KEY_SALT,  # ВИКОРИСТОВУЄМО ФІКСОВАНИЙ SALT
-        info=b'session key',  # Contextual information
+        info=b"session key",  # Contextual information
     )
     session_key = hkdf.derive(shared_secret)
     return session_key
-
 
 
 def encrypt_message(session_key, plaintext):
@@ -169,6 +165,7 @@ def encrypt_message(session_key, plaintext):
     encryptor = cipher.encryptor()
     ciphertext = encryptor.update(plaintext) + encryptor.finalize()
     return iv + ciphertext + encryptor.tag
+
 
 def decrypt_message(session_key, ciphertext_with_tag):
     """Decrypt a message encrypted with AES-GCM."""
