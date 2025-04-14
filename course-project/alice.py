@@ -49,36 +49,28 @@ async def receive(reader, session_key, sender_public_key):
                         try:
                             sequence_number = int(sequence_number_str)
                             if sequence_number in received_sequence_numbers:
-                                print(
-                                    f"{THEIR_PROMPT}Помилка: Повторне повідомлення з порядковим номером {sequence_number}!"
-                                )
                                 prompt()
-                                continue  # Ігноруємо повторне повідомлення
+                                continue
                             received_sequence_numbers.add(sequence_number)
                             message = actual_plaintext
                             show(message)
                             prompt()
                         except ValueError:
-                            print(f"{THEIR_PROMPT}Помилка: Недійсний порядковий номер!")
                             prompt()
                     else:
-                        print(
-                            f"{THEIR_PROMPT}Помилка: Неправильний формат повідомлення!"
-                        )
+                        print(f"{THEIR_PROMPT}Ошибка: Неправильный формат сообщения!")
                         prompt()
                 except InvalidTag:
-                    print(
-                        f"{THEIR_PROMPT}Помилка: Недійсний тег автентифікації! Можливо, повідомлення було підроблено."
-                    )
+                    print(f"{THEIR_PROMPT}Ошибка тэга аутентификации")
                     prompt()
                 except Exception as e:
-                    print(f"{THEIR_PROMPT}Помилка при дешифруванні: {e}")
+                    print(f"{THEIR_PROMPT}Ошибка при дешифровании: {e}")
                     prompt()
             else:
-                print(f"{THEIR_PROMPT}Помилка: Недійсний підпис від відправника!")
+                print(f"{THEIR_PROMPT}Ошибка: Недействительная подпись!")
                 prompt()
         except Exception as e:
-            print(f"{THEIR_PROMPT}Помилка при отриманні: {e}")
+            print(f"{THEIR_PROMPT}Ошибка при получении: {e}")
             break
 
 
@@ -92,7 +84,6 @@ async def send(writer, session_key, my_private_key):
         plaintext = message.strip().encode()
 
         message_counter += 1
-        # Додаємо порядковий номер до повідомлення
         data_to_sign = str(message_counter).encode() + b":" + plaintext
         ciphertext_with_tag = encrypt_message(session_key, data_to_sign)
         signature = sign_data(my_private_key, ciphertext_with_tag)
@@ -110,25 +101,18 @@ async def init_connection(reader, writer):
     print("Starting secure key exchange with Bob...")
     prompt()
 
-    # 1. Генеруємо довгострокову пару ключів Alice
     alice_ecdsa_private, alice_ecdsa_public = generate_key_pair_ecds()
     print("Alice generated her ECDSA keys.")
 
-    # 2. Серіалізуємо та відправляємо довгостроковий публічний ключ Alice
     alice_ecdsa_public_bytes = serialize_public_key(alice_ecdsa_public)
     writer.write(alice_ecdsa_public_bytes)
     await writer.drain()
     print("Alice sent her ECDSA public key to Bob.")
 
-    # 3. Генеруємо одноразову пару ключів DH Alice
     alice_dh_private, alice_dh_public = generate_diffie_hellman_key()
     alice_dh_public_bytes = serialize_dh_public_key(alice_dh_public)
     print("Alice generated her DH key.")
-    print(
-        "Alice's DH public key (bytes):", alice_dh_public_bytes.hex()
-    )  # ДОДАНИЙ РЯДОК
 
-    # 4. Серіалізуємо та відправляємо публічний ключ DH Alice, підписаний довгостроковим ключем
     signature_alice_dh = sign_data(alice_ecdsa_private, alice_dh_public_bytes)
     writer.write(alice_dh_public_bytes)
     writer.write(len(signature_alice_dh).to_bytes(4, "big"))
@@ -136,7 +120,6 @@ async def init_connection(reader, writer):
     await writer.drain()
     print("Alice sent her DH public key and signature to Bob.")
 
-    # 5. Отримуємо публічний ключ DH Bob'а та його підпис
     bob_dh_public_bytes = await reader.read(32)
     if not bob_dh_public_bytes:
         print("Error: Bob disconnected before sending his DH public key.")
@@ -153,7 +136,6 @@ async def init_connection(reader, writer):
     bob_dh_public = deserialize_dh_public_key(bob_dh_public_bytes)
     print("Alice received Bob's DH public key and signature.")
 
-    # 6. Отримуємо довгостроковий публічний ключ Bob'а
     bob_ecdsa_public_bytes = await reader.read(2048)
     if not bob_ecdsa_public_bytes:
         print("Error: Bob disconnected before sending his ECDSA public key.")
@@ -161,16 +143,14 @@ async def init_connection(reader, writer):
     bob_ecdsa_public = deserialize_public_key(bob_ecdsa_public_bytes)
     print("Alice received Bob's ECDSA public key.")
 
-    # 7. Перевіряємо підпис публічного ключа DH Bob'а довгостроковим публічним ключем Bob'а
     if not verify_signature(bob_ecdsa_public, signature_bob_dh, bob_dh_public_bytes):
         print("Error: Invalid signature on Bob's DH public key!")
         return
     print("Signature on Bob's DH public key is valid.")
 
     shared_secret_alice = derive_shared_secret(alice_dh_private, bob_dh_public)
-    print("Alice's shared secret (bytes):", shared_secret_alice.hex())  # ДОДАНИЙ РЯДОК
+
     session_key_alice = derive_session_key(shared_secret_alice)
-    print("Alice's session key:", session_key_alice.hex())
 
     print("Secure key exchange complete!")
     prompt()

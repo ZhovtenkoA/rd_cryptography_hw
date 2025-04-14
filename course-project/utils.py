@@ -17,7 +17,7 @@ THEIR_PROMPT = "\033[31m" + "\n<<< " + "\033[0m"
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 8888
 
-SESSION_KEY_SALT = b"some fixed salt"  # ВИЗНАЧАЄМО ФІКСОВАНИЙ SALT
+SESSION_KEY_SALT = b"some fixed salt"
 
 
 def prompt():
@@ -93,7 +93,7 @@ def serialize_private_key(private_key):
     private_bytes = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),  # For simplicity, no password
+        encryption_algorithm=serialization.NoEncryption(),
     )
     return private_bytes
 
@@ -151,7 +151,7 @@ def derive_session_key(shared_secret):
     hkdf = HKDF(
         algorithm=hashes.SHA256(),
         length=32,  # 32 bytes for AES-256 key
-        salt=SESSION_KEY_SALT,  # ВИКОРИСТОВУЄМО ФІКСОВАНИЙ SALT
+        salt=SESSION_KEY_SALT,
         info=b"session key",  # Contextual information
     )
     session_key = hkdf.derive(shared_secret)
